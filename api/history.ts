@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
 
-const TUSHARE_API = 'http://api.tushare.pro';
+const TUSHARE_API = 'http://lianghua.nanyangqiankun.top';
 const CACHE_DURATION = 60 * 60 * 1000; // 1小时缓存
 
 const cache = new Map<string, { data: any; timestamp: number }>();
