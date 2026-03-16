@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // 使用自建Tushare代理服务
 const TUSHARE_API = 'http://lianghua.nanyangqiankun.top';
-const CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
+const CACHE_DURATION = 30 * 60 * 1000; // 30分钟缓存，减少API调用
 
 let cache: { data: any; timestamp: number } | null = null;
 
@@ -66,6 +66,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (response.data.code !== 0) {
+      // 如果是频率限制错误，返回缓存数据（即使过期）
+      if (cache && response.data.msg && response.data.msg.includes('上限')) {
+        return res.status(200).json({
+          success: true,
+          data: cache.data,
+          cached: true,
+          timestamp: new Date().toISOString(),
+        });
+      }
       return res.status(500).json({
         success: false,
         error: response.data.msg || 'Tushare API 调用失败',
