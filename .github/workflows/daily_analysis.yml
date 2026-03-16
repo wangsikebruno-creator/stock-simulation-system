@@ -1,0 +1,51 @@
+name: Daily Stock Analysis
+
+on:
+  schedule:
+    # 每个交易日北京时间 9:30 执行（UTC 1:30）
+    - cron: '30 1 * * 1-5'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch stock data
+        id: fetch_data
+        run: |
+          # 获取股票列表
+          STOCKS="${{ secrets.STOCK_LIST }}"
+          if [ -z "$STOCKS" ]; then
+            STOCKS="600000.SH,000001.SZ,600519.SH,000002.SZ,600036.SH,601318.SH"
+          fi
+
+          echo "Fetching data for: $STOCKS"
+
+          # 调用 API 获取数据
+          RESPONSE=$(curl -s "https://${{ secrets.VERCEL_PROJECT_ID }}.vercel.app/api/quotes")
+
+          echo "response<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESPONSE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Save analysis results
+        run: |
+          mkdir -p analysis_results
+          echo "${{ steps.fetch_data.outputs.response }}" > analysis_results/daily_$(date +%Y%m%d).json
+          echo "Analysis completed at $(date)"
+
+      - name: Upload analysis artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-analysis-$(date +%Y%m%d)
+          path: analysis_results/
+          retention-days: 30
