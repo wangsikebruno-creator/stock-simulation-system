@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
 
-const TUSHARE_API = 'http://api.tushare.pro';
+// 使用自建Tushare代理服务
+const TUSHARE_API = 'http://lianghua.nanyangqiankun.top';
 const CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
 
 let cache: { data: any; timestamp: number } | null = null;
