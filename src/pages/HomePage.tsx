@@ -11,23 +11,25 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">📈 模拟股票实验系统</h1>
-          <p className="text-gray-600">A股实时行情与智能分析</p>
+        <div className="mb-10 text-center">
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+            📈 模拟股票实验系统
+          </h1>
+          <p className="text-gray-600 text-lg">A股实时行情与智能分析</p>
         </div>
 
         {/* Refresh Button */}
-        <div className="mb-6 flex justify-between items-center">
-          <div className="text-sm text-gray-600">
+        <div className="mb-8 flex justify-between items-center bg-white rounded-xl shadow-sm p-4">
+          <div className="text-sm font-medium text-gray-700">
             {stocks.length > 0 && `共 ${stocks.length} 只股票`}
           </div>
           <button
             onClick={refreshStocks}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-400 transition-all duration-300 shadow-md hover:shadow-lg font-medium"
           >
             {loading ? '刷新中...' : '🔄 刷新数据'}
           </button>

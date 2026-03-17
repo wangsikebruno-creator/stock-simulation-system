@@ -25,7 +25,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 获取股票数据
-    const quoteResponse = await fetch(`${req.headers.host}/api/quotes?symbol=${symbol}`);
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers.host;
+    const quoteResponse = await fetch(`${protocol}://${host}/api/quotes?symbol=${symbol}`);
     const quoteData = await quoteResponse.json();
 
     if (!quoteData.success || quoteData.data.length === 0) {
@@ -62,13 +64,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let analysis = '';
     let model = '';
 
-    // 优先使用 Gemini
-    const geminiKey = process.env.GEMINI_API_KEY;
+    // 优先使用 OpenAI 兼容 API (Claude/DeepSeek)
     const openaiKey = process.env.OPENAI_API_KEY;
     const openaiBaseUrl = process.env.OPENAI_BASE_URL || DEEPSEEK_API;
     const openaiModel = process.env.OPENAI_MODEL || 'deepseek-chat';
+    const geminiKey = process.env.GEMINI_API_KEY;
 
-    if (geminiKey) {
+    if (openaiKey) {
+      // 使用 OpenAI 兼容 API (Claude/DeepSeek)
+      try {
+        const isAnthropic = openaiBaseUrl.includes('anthropic.com');
+
+        const requestBody = isAnthropic
+          ? {
+              model: openaiModel,
+              max_tokens: 1024,
+              messages: [
+                {
+                  role: 'user',
+                  content: prompt,
+                },
+              ],
+            }
+          : {
+              model: openaiModel,
+              messages: [
+                {
+                  role: 'user',
+                  content: prompt,
+                },
+              ],
+            };
+
+        const headers = isAnthropic
+          ? {
+              'Content-Type': 'application/json',
+              'x-api-key': openaiKey,
+              'anthropic-version': '2023-06-01',
+            }
+          : {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${openaiKey}`,
+            };
+
+        const response = await axios.post(openaiBaseUrl, requestBody, { headers });
+
+        analysis = response.data.content?.[0]?.text || response.data.choices[0].message.content;
+        model = openaiModel;
+      } catch (error: any) {
+        console.error('AI API Error:', error.response?.data || error.message);
+        throw new Error(`AI API 调用失败: ${error.response?.data?.error?.message || error.message}`);
+      }
+    } else if (geminiKey) {
       // 使用 Gemini
       try {
         const response = await axios.post(
@@ -88,38 +135,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error('Gemini API Error:', error.response?.data || error.message);
         throw new Error('Gemini API 调用失败');
       }
-    } else if (openaiKey) {
-      // 使用 OpenAI 兼容 API (DeepSeek)
-      try {
-        const response = await axios.post(
-          openaiBaseUrl,
-          {
-            model: openaiModel,
-            messages: [
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${openaiKey}`,
-            },
-          }
-        );
-
-        analysis = response.data.choices[0].message.content;
-        model = openaiModel;
-      } catch (error: any) {
-        console.error('OpenAI API Error:', error.response?.data || error.message);
-        throw new Error('AI API 调用失败');
-      }
     } else {
       return res.status(500).json({
         success: false,
-        error: 'AI API Key 未配置（需要 GEMINI_API_KEY 或 OPENAI_API_KEY）',
+        error: 'AI API Key 未配置（需要 OPENAI_API_KEY 或 GEMINI_API_KEY）',
         timestamp: new Date().toISOString(),
       });
     }
