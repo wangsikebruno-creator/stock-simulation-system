@@ -96,6 +96,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               ],
             };
 
+        const apiUrl = isAnthropic
+          ? 'https://api.anthropic.com/v1/messages'
+          : openaiBaseUrl;
+
         const headers = isAnthropic
           ? {
               'Content-Type': 'application/json',
@@ -107,7 +111,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               Authorization: `Bearer ${openaiKey}`,
             };
 
-        const response = await axios.post(openaiBaseUrl, requestBody, { headers });
+        const response = await axios.post(apiUrl, requestBody, { headers });
 
         analysis = response.data.content?.[0]?.text || response.data.choices[0].message.content;
         model = openaiModel;
