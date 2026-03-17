@@ -74,20 +74,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 获取今天的日期 (YYYYMMDD格式)
-    const today = new Date();
-    const tradeDate = today.toISOString().slice(0, 10).replace(/-/g, '');
-
     // 更新最后请求时间
     lastRequestTime = Date.now();
 
-    // 调用Tushare API
+    // 获取最近5个交易日的数据（不指定日期，让API返回最新数据）
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7); // 往前推7天
+
+    const start = startDate.toISOString().slice(0, 10).replace(/-/g, '');
+    const end = endDate.toISOString().slice(0, 10).replace(/-/g, '');
+
+    // 调用Tushare API - 获取最近的交易数据
     const response = await axios.post(TUSHARE_API, {
       api_name: 'daily',
       token: token,
       params: {
         ts_code: stockCodes.join(','),
-        trade_date: tradeDate,
+        start_date: start,
+        end_date: end,
       },
       fields: 'ts_code,trade_date,open,high,low,close,pre_close,change,pct_chg,vol,amount',
     });
@@ -113,13 +118,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const items = response.data.data.items || [];
     const fields = response.data.data.fields || [];
 
-    // 转换数据格式
-    const stocks = items.map((item: any[]) => {
+    // 转换数据格式 - 按股票代码分组，取每个股票最新的一条数据
+    const stockMap = new Map();
+    items.forEach((item: any[]) => {
       const stock: any = {};
       fields.forEach((field: string, index: number) => {
         stock[field] = item[index];
       });
 
+      const tsCode = stock.ts_code;
+      const tradeDate = stock.trade_date;
+
+      // 如果该股票还没有数据，或者当前数据更新，则更新
+      if (!stockMap.has(tsCode) || stockMap.get(tsCode).trade_date < tradeDate) {
+        stockMap.set(tsCode, stock);
+      }
+    });
+
+    // 转换为数组并添加股票名称
+    const stocks = Array.from(stockMap.values()).map((stock: any) => {
       // 添加股票名称 (简化版，实际应该从另一个API获取)
       const nameMap: { [key: string]: string } = {
         '600000.SH': '浦发银行',
