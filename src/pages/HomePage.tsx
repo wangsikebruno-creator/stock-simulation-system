@@ -8,14 +8,13 @@ const HomePage: React.FC = () => {
 
   // 计算市场统计
   const marketStats = useMemo(() => {
-    if (stocks.length === 0) return { up: 0, down: 0, avgChange: 0, totalVolume: 0 };
+    if (stocks.length === 0) return { up: 0, down: 0, avgChange: 0 };
 
     const up = stocks.filter(s => s.pct_chg > 0).length;
     const down = stocks.filter(s => s.pct_chg < 0).length;
     const avgChange = stocks.reduce((sum, s) => sum + s.pct_chg, 0) / stocks.length;
-    const totalVolume = stocks.reduce((sum, s) => sum + s.vol, 0);
 
-    return { up, down, avgChange, totalVolume };
+    return { up, down, avgChange };
   }, [stocks]);
 
   if (loading && stocks.length === 0) {
@@ -23,92 +22,109 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
-      {/* 动态背景效果 */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+      {/* 动态背景 */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-30">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 py-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <div className="inline-block mb-4">
-            <div className="flex items-center gap-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-blue-500/30 rounded-full px-6 py-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-blue-300 text-sm font-medium">实时数据 · AI 驱动</span>
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 mb-6">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-white/80 text-sm font-medium">实时数据 · AI 智能分析</span>
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-4 tracking-tight">
+            智能股票分析平台
+          </h1>
+          <p className="text-xl text-white/70 max-w-2xl mx-auto">
+            专业级 A 股实时行情监控与人工智能分析系统
+          </p>
+        </div>
+
+        {/* 市场概览 */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-sm mb-1">总股票数</p>
+                <p className="text-4xl font-bold text-white">{stocks.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
             </div>
           </div>
 
-          <h1 className="text-6xl md:text-7xl font-black mb-4">
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              智能股票分析
-            </span>
-          </h1>
-          <p className="text-slate-400 text-xl font-light">专业级 A 股实时行情与 AI 智能分析平台</p>
-        </div>
-
-        {/* 市场概览卡片 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-300">
-            <div className="text-slate-400 text-sm mb-2">总股票数</div>
-            <div className="text-3xl font-bold text-white">{stocks.length}</div>
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-sm mb-1">上涨 / 下跌</p>
+                <p className="text-4xl font-bold text-white">
+                  <span className="text-green-400">{marketStats.up}</span>
+                  <span className="text-white/40 text-2xl mx-2">/</span>
+                  <span className="text-red-400">{marketStats.down}</span>
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 hover:border-green-500/50 transition-all duration-300">
-            <div className="text-slate-400 text-sm mb-2">上涨</div>
-            <div className="text-3xl font-bold text-green-400">{marketStats.up}</div>
-          </div>
-
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 hover:border-red-500/50 transition-all duration-300">
-            <div className="text-slate-400 text-sm mb-2">下跌</div>
-            <div className="text-3xl font-bold text-red-400">{marketStats.down}</div>
-          </div>
-
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300">
-            <div className="text-slate-400 text-sm mb-2">平均涨幅</div>
-            <div className={`text-3xl font-bold ${marketStats.avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {marketStats.avgChange >= 0 ? '+' : ''}{marketStats.avgChange.toFixed(2)}%
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-sm mb-1">平均涨幅</p>
+                <p className={`text-4xl font-bold ${marketStats.avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {marketStats.avgChange >= 0 ? '+' : ''}{marketStats.avgChange.toFixed(2)}%
+                </p>
+              </div>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${marketStats.avgChange >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                <svg className={`w-6 h-6 ${marketStats.avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
 
         {/* 控制栏 */}
-        <div className="mb-8 flex justify-between items-center bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4">
-          <div className="flex items-center gap-4">
-            <div className="text-slate-300 font-medium">
-              实时监控中
-            </div>
+        <div className="flex items-center justify-between mb-8 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+          <div className="flex items-center gap-3">
+            <span className="text-white font-medium">实时监控</span>
             {loading && (
-              <div className="flex items-center gap-2 text-blue-400 text-sm">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping"></div>
-                更新中...
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
+                <span className="text-blue-300 text-sm">更新中...</span>
               </div>
             )}
           </div>
           <button
             onClick={refreshStocks}
             disabled={loading}
-            className="group relative px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm border border-white/30"
           >
-            <span className="relative z-10 flex items-center gap-2">
-              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              {loading ? '刷新中' : '刷新数据'}
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            {loading ? '刷新中...' : '🔄 刷新数据'}
           </button>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-500/10 border border-red-500/50 text-red-400 px-6 py-4 rounded-2xl backdrop-blur-xl">
+          <div className="mb-6 bg-red-500/20 border border-red-500/50 text-red-200 px-6 py-4 rounded-2xl backdrop-blur-md">
             <div className="flex items-center gap-3">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
-              {error}
+              <span>{error}</span>
             </div>
           </div>
         )}
@@ -122,29 +138,20 @@ const HomePage: React.FC = () => {
           </div>
         ) : (
           !loading && (
-            <div className="text-center py-20">
-              <div className="inline-block p-8 bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-3xl">
-                <svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-                <p className="text-slate-400 text-lg mb-2">暂无股票数据</p>
-                <p className="text-slate-500 text-sm">请检查 Tushare API 配置</p>
-              </div>
+            <div className="text-center py-20 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+              <svg className="w-16 h-16 mx-auto mb-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <p className="text-white/70 text-lg mb-2">暂无股票数据</p>
+              <p className="text-white/50 text-sm">请检查 Tushare API 配置</p>
             </div>
           )
         )}
 
         {/* Footer */}
-        <div className="mt-16 text-center">
-          <div className="inline-block bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl px-8 py-4">
-            <p className="text-slate-400 text-sm mb-1">
-              数据来源: <span className="text-blue-400 font-medium">Tushare</span> ·
-              AI 引擎: <span className="text-purple-400 font-medium">Claude</span>
-            </p>
-            <p className="text-slate-500 text-xs">
-              ⚠️ 本系统仅供学习研究使用，不构成投资建议
-            </p>
-          </div>
+        <div className="mt-16 text-center text-white/50 text-sm space-y-2">
+          <p>数据来源: Tushare | 数据延迟约15分钟</p>
+          <p>⚠️ 本系统仅供学习研究使用，不构成投资建议</p>
         </div>
       </div>
     </div>
